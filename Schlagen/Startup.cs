@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Schlagen.Areas.Identity;
 using Schlagen.Data;
+using Schlagen.Services;
 
 namespace Schlagen
 {
@@ -33,17 +34,20 @@ namespace Schlagen
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                    Configuration.GetConnectionString("SchlagenConnection")));
+            services.AddDefaultIdentity<IdentityUser>(
+                options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddSingleton<WeatherForecastService>();
+            services.AddScoped<IEmploymentServices, EmploymentServices>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider )
         {
             if (env.IsDevelopment())
             {
@@ -71,6 +75,55 @@ namespace Schlagen
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            CreateRolesAsync(serviceProvider).Wait();
+        }
+
+        private async Task CreateRolesAsync(IServiceProvider serviceProvider)
+        {
+            var userManager 
+                = serviceProvider
+                .GetRequiredService<UserManager<IdentityUser>>();
+            var roleManager
+                = serviceProvider
+                .GetRequiredService<RoleManager<IdentityRole>>();
+
+            List<string> roleNames = new List<string> { "Admin", "ContentCreator" };
+
+            IdentityResult result;
+
+            foreach (var roleName in roleNames)
+            {
+                if (await roleManager.RoleExistsAsync(roleName) == false)
+                    result = await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+
+            // Create admin site user
+            var adminEmail = Configuration.GetSection("AppSettings")["AdminEmail"];
+            var adminPassword = Configuration.GetSection("AppSettings")["AdminPwd"];
+
+            if (string.IsNullOrEmpty(adminEmail) == false
+                && string.IsNullOrEmpty(adminPassword) == false)
+            {
+                var sysAdmin = new IdentityUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true
+                };
+
+                if (await userManager.FindByEmailAsync(adminEmail) == null)
+                {
+                    var createdAdminUser
+                        = await userManager.CreateAsync(sysAdmin, adminPassword);
+
+                    if (createdAdminUser.Succeeded)
+                    {
+                        result
+                            = await userManager.AddToRoleAsync(sysAdmin, "Admin");
+                    }
+                }
+            }
         }
     }
 }
