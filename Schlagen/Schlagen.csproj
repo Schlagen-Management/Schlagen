@@ -13,4 +13,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="Pages\careers.razor" />
+  </ItemGroup>
 </Project>
