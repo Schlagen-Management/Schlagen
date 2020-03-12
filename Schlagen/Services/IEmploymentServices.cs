@@ -11,6 +11,7 @@ namespace Schlagen.Services
         public Task<List<JobRequisitionForList>> GetAllJobRequisitionsAsync();
         public Task<List<JobRequisitionForList>> GetJobRequisitionsAsync(
             int employmentLocationId, int jobTypeId, int employmentTypeId);
+        public Task<JobRequisition> GetJobRequisitionAsync(int jobRequisitionId);
         public Task<List<JobType>> GetJobTypesAsync();
         public Task<List<EmploymentType>> GetEmploymentTypesAsync();
         public Task<List<EmploymentLocation>> GetEmploymentLocationsAsync();

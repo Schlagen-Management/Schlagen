@@ -69,6 +69,14 @@ namespace Schlagen.Services
                 }).ToListAsync();
         }
 
+        public async Task<JobRequisition> GetJobRequisitionAsync(int jobRequisitionId)
+        {
+            return await _context.JobRequisitions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(jr 
+                => jr.JobRequisitionId == jobRequisitionId);
+        }
+
         public async Task<List<JobType>> GetJobTypesAsync()
         {
             return await _context.JobTypes

@@ -1,0 +1,45 @@
+﻿@page "/JobRequisition"
+@page "/JobRequisition/{jobRequisitionId}"
+
+@using Schlagen.Services
+@using Schlagen.Data.EntityClasses
+@using Microsoft.AspNetCore.Identity
+@using Radzen.Blazor
+
+@inject UserManager<IdentityUser> UserManager
+@inject NavigationManager NavigationManager
+@inherits OwningComponentBase<IEmploymentServices>
+
+<section id="hero">
+    <div class="container">
+        <div class="row">
+            <div class="col">@jobRequisition.Title</div>
+        </div>
+    </div>
+</section>
+<section id="services">
+    <div class="container">
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public int? jobRequisitionId { get; set; }
+
+    public Schlagen.Data.EntityClasses.JobRequisition jobRequisition { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (jobRequisitionId.HasValue == true)
+        {
+            jobRequisition
+                = await @Service.GetJobRequisitionAsync(jobRequisitionId.Value);
+        }
+        else
+        {
+            jobRequisition
+                = new Schlagen.Data.EntityClasses.JobRequisition()
+                { Title = "New Job Requisition" };
+        }
+    }
+}
