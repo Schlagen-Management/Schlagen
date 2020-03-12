@@ -21,4 +21,7 @@
     <Folder Include="Components\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="Pages\careers.razor" />
+  </ItemGroup>
 </Project>
