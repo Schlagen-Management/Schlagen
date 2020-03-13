@@ -1,0 +1,54 @@
+﻿@page "/Contact"
+
+@using Schlagen.Services
+@using Schlagen.Data.EntityClasses
+@using Microsoft.AspNetCore.Identity
+@using Radzen.Blazor
+
+@inject UserManager<IdentityUser> UserManager
+@inject NavigationManager NavigationManager
+@inherits OwningComponentBase<IInformationRequestServices>
+
+<section id="page-heading">
+    <div class="container">
+        <div class="row">
+            <div class="col"><h1>Contact</h1></div>
+        </div>
+    </div>
+</section>
+
+<section id="Contact">
+    <div class="container">
+        <div class="row">
+           <div class="col">
+               ... the information request form goes here
+            </div>
+            <div class="col">
+                ... some text goes here
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; }
+
+    public InformationRequest informationRequest { get; set; }
+
+    public List<InformationType> informationTypes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        informationTypes
+            = await @Service.GetInformationTypes();
+
+    }
+
+    public void SaveInformationRequest()
+    {
+
+    }
+}

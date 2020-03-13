@@ -9,143 +9,60 @@
 @inject NavigationManager NavigationManager
 @inherits OwningComponentBase<IEmploymentServices>
 
-<section id="hero">
+<section id="page-heading">
     <div class="container">
         <div class="row">
-            <div class="col">Current Openings</div>
+            <div class="col"><h1>Careers</h1></div>
         </div>
     </div>
 </section>
-<section id="services">
+<section id="careers">
     <div class="container">
-        @if (employmentLocations == null && employmentTypes == null
-           && jobTypes == null)
-        {
-            <p><em>Loading...</em></p>
-        }
-        else
-        {
-            <AuthorizeView>
-                <Authorized>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-primary"
-                                    @onclick="AddNewJobRequisition">
-                                Add Job Requisition
-                            </button>
-                        </div>
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Job One</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Orlando, FL</h6>
+                        <p class="card-text">Position excerpt.</p>
+                        <a href="#" class="card-link">Apply Here</a>
                     </div>
-                </Authorized>
-            </AuthorizeView>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <RadzenDropDown Data="@employmentLocations" TValue="int"
-                                    TextProperty="Name" ValueProperty="EmploymentLocationId"
-                                    Placeholder="Select Location ..." />
-                </div>
-                <div class="col-md-4">
-                    <RadzenDropDown Data="@employmentTypes" TValue="int"
-                                    TextProperty="Name" ValueProperty="EmploymentTypeId"
-                                    Placeholder="Select employment type ..." />
-                </div>
-                <div class="col-md-4">
-                    <RadzenDropDown Data="@jobTypes" TValue="int"
-                                    TextProperty="Name" ValueProperty="JobTypeId"
-                                    Placeholder="Select job type ..." />
                 </div>
             </div>
-        }
-        <div class="row">
-            <div class="col-md-12">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Days Since Posted</th>
-                            <th>Location</th>
-                            <AuthorizeView><Authorized><th></th></Authorized></AuthorizeView>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (jobRequisitions == null)
-                        {
-                            <tr>
-                                <td colspan="3">
-                                    <p><em>Loading...</em></p>
-                                </td>
-                            </tr>
-                        }
-                        else if (jobRequisitions.Count() == 0)
-                        {
-                            <tr>
-                                <td colspan="4">
-                                    <span>No job requisitions defined yet...</span>
-                                </td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var jobRequisition in jobRequisitions)
-                            {
-                                <tr>
-                                    <td>@jobRequisition.Title</td>
-                                    <td>@jobRequisition.DaysSincePosted</td>
-                                    <td>@jobRequisition.Location</td>
-                                    <AuthorizeView>
-                                        <Authorized>
-                                            <td>
-                                                <button class="btn btn-primary"
-                                                        @onclick="(() => EditJobRequisition(jobRequisition.JobRequisitionId))">
-                                                    Edit
-                                                </button>
-                                            </td>
-                                        </Authorized>
-                                    </AuthorizeView>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Job One</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Orlando, FL</h6>
+                        <p class="card-text">Position excerpt.</p>
+                        <a href="#" class="card-link">Apply Here</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Job One</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Orlando, FL</h6>
+                        <p class="card-text">Position excerpt.</p>
+                        <a href="#" class="card-link">Apply Here</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Job One</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Orlando, FL</h6>
+                        <p class="card-text">Position excerpt.</p>
+                        <a href="#" class="card-link">Apply Here</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authStateTask { get; set; }
 
-    public List<EmploymentLocation> employmentLocations { get; set; }
-
-    public List<EmploymentType> employmentTypes { get; set; }
-
-    public List<JobType> jobTypes { get; set; }
-
-    public List<JobRequisitionForList> jobRequisitions { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        employmentTypes
-            = await @Service.GetEmploymentTypesAsync();
-
-        employmentLocations
-            = await @Service.GetEmploymentLocationsAsync();
-
-        jobTypes
-            = await @Service.GetJobTypesAsync();
-
-        jobRequisitions
-            = await @Service.GetAllJobRequisitionsAsync();
-    }
-
-    protected void AddNewJobRequisition()
-    {
-        NavigationManager.NavigateTo("JobRequisition");
-    }
-
-    protected void EditJobRequisition(int jobRequisitionId)
-    {
-        NavigationManager.NavigateTo("JobRequisition/" + jobRequisitionId.ToString());
-    }
 }

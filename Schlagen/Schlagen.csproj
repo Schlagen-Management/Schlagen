@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="8.6.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />
@@ -14,14 +15,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Radzen.Blazor" Version="2.3.7" />
+    <PackageReference Include="Radzen.Blazor" Version="2.3.8" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Components\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="Pages\careers.razor" />
   </ItemGroup>
 </Project>

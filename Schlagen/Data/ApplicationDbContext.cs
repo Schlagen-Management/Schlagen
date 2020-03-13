@@ -15,6 +15,8 @@ namespace Schlagen.Data
         public DbSet<JobApplicant> JobApplicants { get; set; }
         public DbSet<JobRequisition> JobRequisitions { get; set; }
         public DbSet<JobType> JobTypes { get; set; }
+        public DbSet<InformationType> InformationTypes { get; set; }
+        public DbSet<InformationRequest> InformationRequests { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
@@ -107,6 +109,37 @@ namespace Schlagen.Data
             builder.Entity<JobApplicant>().HasOne(ja => ja.JobRequisition)
                 .WithMany()
                 .HasForeignKey(ja => ja.JobRequisitionId);
+
+            //
+            // Information Types
+            //
+            builder.Entity<InformationType>().HasKey(it => it.InformationTypeId);
+            builder.Entity<InformationType>().ToTable("InformationTypes", "aic");
+            builder.Entity<InformationType>().Property(it => it.Name)
+                .IsRequired().HasMaxLength(100);
+            builder.Entity<InformationType>().HasData(
+                new InformationType { InformationTypeId = 1, Name = "Dedicated Office" },
+                new InformationType { InformationTypeId = 2, Name = "Flexible Desk" },
+                new InformationType { InformationTypeId = 3, Name = "Virtual Office" },
+                new InformationType { InformationTypeId = 4, Name = "Conference Room" },
+                new InformationType { InformationTypeId = 5, Name = "Training Room" },
+                new InformationType { InformationTypeId = 6, Name = "CoPlay Space" },
+                new InformationType { InformationTypeId = 7, Name = "Craft Center" });
+
+            //
+            // Information Requested
+            //
+            builder.Entity<InformationRequest>().HasKey(ir => ir.InformationRegardingId);
+            builder.Entity<InformationRequest>().ToTable("InformationRequests", "aic");
+            builder.Entity<InformationRequest>().Property(ir => ir.Name)
+                .IsRequired().HasMaxLength(100);
+            builder.Entity<InformationRequest>().Property(ir => ir.Email)
+                .IsRequired().HasMaxLength(100);
+            builder.Entity<InformationRequest>().Property(ir => ir.Phone)
+                .IsRequired().HasMaxLength(25);
+            builder.Entity<InformationRequest>().HasOne(ir => ir.InformationRegarding)
+                .WithMany()
+                .HasForeignKey(ir => ir.InformationRegardingId);
         }
     }
 }

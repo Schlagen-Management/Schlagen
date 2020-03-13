@@ -42,8 +42,8 @@ namespace Schlagen
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-            services.AddSingleton<WeatherForecastService>();
             services.AddScoped<IEmploymentServices, EmploymentServices>();
+            services.AddScoped<IInformationRequestServices, InformationServices>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
