@@ -1,10 +1,20 @@
-﻿
+﻿@page "/Careers"
+
+@using Schlagen.Services
+@using Schlagen.Data.EntityClasses
+@using Microsoft.AspNetCore.Identity
+@using Radzen.Blazor
+
+@inject UserManager<IdentityUser> UserManager
+@inject NavigationManager NavigationManager
+@inherits OwningComponentBase<IEmploymentServices>
+
 <section id="page-heading">
     <div class="container">
         <div class="row">
             <div class="col"><h1>Careers</h1></div>
-         </div>
-     </div>
+        </div>
+    </div>
 </section>
 <section id="careers">
     <div class="container">
@@ -52,3 +62,7 @@
         </div>
     </div>
 </section>
+
+@code {
+
+}
