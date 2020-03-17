@@ -54,8 +54,9 @@ namespace Schlagen
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             //services.AddScoped<IEmploymentServices, EmploymentServices>();
-            services.AddScoped<IInformationRequestServices, InformationServices>();
+            services.AddScoped<IInformationRequestServices, InformationRequestServices>();
             services.AddScoped<AzureServiceTokenProvider>();
+            services.AddSingleton<IEmailService, EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -89,55 +90,18 @@ namespace Schlagen
             });
 
             // Perform database migration if required
-            var dbContext 
+            var dbContext
                 = serviceProvider.GetRequiredService<ApplicationDbContext>();
             dbContext.Database.Migrate();
 
-            //Create the required user roles
+            // Create the required user roles
             CreateRolesAsync(serviceProvider, env).Wait();
         }
 
         private async Task CreateRolesAsync(IServiceProvider serviceProvider, IWebHostEnvironment env)
         {
-            string adminEmail = string.Empty;
-            string adminPassword = string.Empty;
-
-            if (env.IsDevelopment())
-            {
-                adminEmail = Configuration.GetSection("AppSettings")["AdminEmail"];
-                adminPassword = Configuration.GetSection("AppSettings")["AdminPwd"];
-            }
-            else
-            {
-                try
-                {
-                    var azureServiceTokenProvider
-                        = serviceProvider.GetRequiredService<AzureServiceTokenProvider>();
-
-                    /* The next four lines of code show you how to use AppAuthentication library to fetch secrets from your key vault */
-                    KeyVaultClient keyVaultClient
-                        = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(
-                        azureServiceTokenProvider.KeyVaultTokenCallback));
-                    var adminEmailSecret
-                        = await keyVaultClient.GetSecretAsync(
-                            "https://aickeyvault.vault.azure.net/secrets/AdminEmail/2fd915c5210a4034a1024b06e8161e79")
-                            .ConfigureAwait(false);
-                    adminEmail = adminEmailSecret.Value;
-                    var adminPwdSecret
-                        = await keyVaultClient.GetSecretAsync(
-                            "https://aickeyvault.vault.azure.net/secrets/AdminPwd/294d4ad990b84ce9b105e56ecd27438c")
-                            .ConfigureAwait(false);
-                    adminPassword = adminPwdSecret.Value;
-                }
-                /* If you have throttling errors see this tutorial https://docs.microsoft.com/azure/key-vault/tutorial-net-create-vault-azure-web-app */
-                /// <exception cref="KeyVaultErrorException">
-                /// Thrown when the operation returned an invalid status code
-                /// </exception>
-                catch (KeyVaultErrorException keyVaultException)
-                {
-                    // TODO: Need to log an error here
-                }
-            }
+            var adminEmail = Configuration.GetSection("AppSettings")["AdminEmail"];
+            var adminPassword = Configuration.GetSection("AppSettings")["AdminPwd"];
 
             var userManager 
                 = serviceProvider

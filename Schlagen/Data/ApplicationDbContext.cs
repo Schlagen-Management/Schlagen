@@ -118,19 +118,22 @@ namespace Schlagen.Data
             builder.Entity<InformationType>().Property(it => it.Name)
                 .IsRequired().HasMaxLength(100);
             builder.Entity<InformationType>().HasData(
-                new InformationType { InformationTypeId = 1, Name = "Dedicated Office" },
-                new InformationType { InformationTypeId = 2, Name = "Flexible Desk" },
-                new InformationType { InformationTypeId = 3, Name = "Virtual Office" },
-                new InformationType { InformationTypeId = 4, Name = "Conference Room" },
-                new InformationType { InformationTypeId = 5, Name = "Training Room" },
-                new InformationType { InformationTypeId = 6, Name = "CoPlay Space" },
-                new InformationType { InformationTypeId = 7, Name = "Craft Center" });
+                new InformationType { InformationTypeId = 1, Name = "N/A" },
+                new InformationType { InformationTypeId = 2, Name = "Dedicated Office" },
+                new InformationType { InformationTypeId = 3, Name = "Flexible Desk" },
+                new InformationType { InformationTypeId = 4, Name = "Virtual Office" },
+                new InformationType { InformationTypeId = 5, Name = "Conference Room" },
+                new InformationType { InformationTypeId = 6, Name = "Training Room" },
+                new InformationType { InformationTypeId = 7, Name = "CoPlay Space" },
+                new InformationType { InformationTypeId = 8, Name = "Craft Center" });
 
             //
             // Information Requested
             //
             builder.Entity<InformationRequest>().HasKey(ir => ir.InformationRegardingId);
             builder.Entity<InformationRequest>().ToTable("InformationRequests", "aic");
+            builder.Entity<InformationRequest>().Property(ir => ir.InformationRequestId)
+                .UseIdentityColumn();
             builder.Entity<InformationRequest>().Property(ir => ir.Name)
                 .IsRequired().HasMaxLength(100);
             builder.Entity<InformationRequest>().Property(ir => ir.Email)

@@ -15,5 +15,7 @@ namespace Schlagen.Services
         public Task<List<InformationRequest>> GetInformationRequests();
 
         public Task<List<InformationType>> GetInformationTypes();
+
+        public Task<InformationType> GetInformationType(int informationTypeId);
     }
 }

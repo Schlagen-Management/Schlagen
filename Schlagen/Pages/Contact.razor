@@ -4,11 +4,18 @@
 @using Schlagen.Data.EntityClasses
 @using Microsoft.AspNetCore.Identity
 @using Radzen.Blazor
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@using Microsoft.Extensions.Configuration
+@using SendGrid.Helpers.Mail
+@using System.Text
 
 @inject UserManager<IdentityUser> UserManager
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject IConfiguration Configuration
 @inject HttpClient Http
+@inject IEmailService EmailService
 @inherits OwningComponentBase<IInformationRequestServices>
 
 <section id="page-heading">
@@ -22,8 +29,45 @@
 <section id="Contact">
     <div class="container">
         <div class="row">
-           <div class="col">
-               ... the information request form goes here
+            <div class="col">
+                <EditForm Model="@informationRequest"
+                          OnValidSubmit="SaveInformationRequest">
+                    <DataAnnotationsValidator />
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <InputText id="Name" class="form-control"
+                                   @bind-Value="@informationRequest.Name" />
+                        <ValidationMessage For="@(() => informationRequest.Name)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Email">Email Address</label>
+                        <InputText id="Email" class="form-control"
+                                   @bind-Value="@informationRequest.Email" />
+                        <ValidationMessage For="@(() => informationRequest.Email)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Phone">Phone Number</label>
+                        <InputText id="Phone" class="form-control"
+                                   @bind-Value="@informationRequest.Phone" />
+                        <ValidationMessage For="@(() => informationRequest.Phone)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="InformationRegarding">Requested Information</label>
+                        <Radzen.Blazor.RadzenDropDown Name="InformationRegarding" class="form-control"
+                                                      @bind-Value="@informationRequest.InformationRegardingId"
+                                                      Data="@informationTypes" TextProperty="Name"
+                                                      ValueProperty="InformationTypeId" 
+                                                      Placeholder="Select type of information requested" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="Details">Request Details</label>
+                        <InputTextArea id="Details" class="form-control"
+                                       @bind-Value="@informationRequest.Details" />
+                        <ValidationMessage For="@(() => informationRequest.Details)" />
+                    </div>
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </EditForm>
             </div>
             <div class="col">
                 ... some text goes here
@@ -36,9 +80,11 @@
     [CascadingParameter]
     private Task<AuthenticationState> authStateTask { get; set; }
 
-    public InformationRequest informationRequest { get; set; }
+    public InformationRequest informationRequest { get; set; } = new InformationRequest();
 
     public List<InformationType> informationTypes { get; set; }
+
+    public string captchaToken { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,8 +95,85 @@
 
     }
 
-    public void SaveInformationRequest()
+    protected async Task SaveInformationRequest()
     {
+        if (Validate(captchaToken) == true)
+        {
+            // Emil the info
+            await SendInformationRequest(informationRequest);
 
+            // Persist it to the DB
+            var success
+                = await @Service.AddInformationRequest(informationRequest.Name,
+                    informationRequest.Email, informationRequest.Phone,
+                    informationRequest.InformationRegardingId,
+                    informationRequest.Details);
+
+            // TODO: Add toast notification that information successfully sent
+
+            // Navigate back to the home page
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Get the Captcha token
+            var siteKey = Configuration.GetSection("AppSettings")["CaptchaSiteKey"];
+            captchaToken = await JSRuntime.InvokeAsync<string>("runCaptcha", siteKey, "ContactPage");
+            StateHasChanged();
+        }
+    }
+
+    protected bool Validate(string gResponse)
+    {
+        using (var client = new System.Net.WebClient())
+        {
+            try
+            {
+                // Enter your reCAPTCHA private key here
+                var secretKey = Configuration.GetSection("AppSettings")["CaptchaSecretKey"];
+                var gReply = client.DownloadString(string.Format(
+                        "https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}",
+                        secretKey, gResponse));
+
+                // Are we dealing with a human
+                var googleReply = JsonSerializer.Deserialize<ReCaptcha>(gReply);
+                return (googleReply.Success == true);
+            }
+            catch (Exception)
+            {
+                // TODO: Added exception loggging 
+                throw;
+            }
+        }
+    }
+
+    protected async Task SendInformationRequest(InformationRequest request)
+    {
+        // Build and send the email
+        var adminEmail
+            = Configuration.GetSection("AppSettings")["AdminEmail"];
+        var _5thFloorInformationEmail
+            = Configuration.GetSection("AppSettings")["5thFloorInformationEmail"];
+        var from = new EmailAddress(adminEmail);
+        var to = new EmailAddress(_5thFloorInformationEmail);
+        var subject = "New Avalon Innovation Club Information Request";
+
+        var informationType
+            = await @Service.GetInformationType(request.InformationRegardingId);
+
+        var message = new StringBuilder();
+        message = message.AppendLine(string.Format("Name: {0}", request.Name));
+        message = message.AppendLine(string.Format("Email: {0}", request.Email));
+        message = message.AppendLine(string.Format("Phone: {0}", request.Phone));
+        message = message.AppendLine(string.Format("Type of Information: {0}", informationType.Name));
+        message = message.AppendLine(string.Format("Details: {0}", request.Details));
+
+        await @EmailService.SendEmail(from, to, subject, message.ToString());
+
+        // TODO: Add error handling and logging
     }
 }

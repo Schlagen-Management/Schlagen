@@ -1,13 +1,15 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Schlagen.Data.Migrations
+namespace Schlagen.Migrations
 {
-    public partial class CreateIdentitySchema : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "aic");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -48,11 +50,25 @@ namespace Schlagen.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "InformationTypes",
+                schema: "aic",
+                columns: table => new
+                {
+                    InformationTypeId = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InformationTypes", x => x.InformationTypeId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     RoleId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -73,7 +89,7 @@ namespace Schlagen.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -153,6 +169,47 @@ namespace Schlagen.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "InformationRequests",
+                schema: "aic",
+                columns: table => new
+                {
+                    InformationRegardingId = table.Column<int>(nullable: false),
+                    InformationRequestId = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 100, nullable: false),
+                    Email = table.Column<string>(maxLength: 100, nullable: false),
+                    Phone = table.Column<string>(maxLength: 25, nullable: false),
+                    Details = table.Column<string>(maxLength: 400, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InformationRequests", x => x.InformationRegardingId);
+                    table.ForeignKey(
+                        name: "FK_InformationRequests_InformationTypes_InformationRegardingId",
+                        column: x => x.InformationRegardingId,
+                        principalSchema: "aic",
+                        principalTable: "InformationTypes",
+                        principalColumn: "InformationTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                schema: "aic",
+                table: "InformationTypes",
+                columns: new[] { "InformationTypeId", "Name" },
+                values: new object[,]
+                {
+                    { 1, "N/A" },
+                    { 2, "Dedicated Office" },
+                    { 3, "Flexible Desk" },
+                    { 4, "Virtual Office" },
+                    { 5, "Conference Room" },
+                    { 6, "Training Room" },
+                    { 7, "CoPlay Space" },
+                    { 8, "Craft Center" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -211,10 +268,18 @@ namespace Schlagen.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "InformationRequests",
+                schema: "aic");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "InformationTypes",
+                schema: "aic");
         }
     }
 }

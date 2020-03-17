@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Schlagen.Data;
 
-namespace Schlagen.Data.Migrations
+namespace Schlagen.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200313004905_AddingInformationRequest")]
-    partial class AddingInformationRequest
+    [Migration("20200317031821_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -221,88 +221,15 @@ namespace Schlagen.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.EmploymentLocation", b =>
-                {
-                    b.Property<int>("EmploymentLocationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("Decimal(9,6)");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("Decimal(9,6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("PostalCode")
-                        .HasColumnType("nvarchar(25)")
-                        .HasMaxLength(25);
-
-                    b.Property<string>("State")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.HasKey("EmploymentLocationId");
-
-                    b.ToTable("EmploymentLocations","5thFloor");
-
-                    b.HasData(
-                        new
-                        {
-                            EmploymentLocationId = 1,
-                            Name = "Orlando"
-                        });
-                });
-
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.EmploymentType", b =>
-                {
-                    b.Property<int>("EmploymentTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.HasKey("EmploymentTypeId");
-
-                    b.ToTable("EmploymentTypes","5thFloor");
-
-                    b.HasData(
-                        new
-                        {
-                            EmploymentTypeId = 1,
-                            Name = "Consultant"
-                        },
-                        new
-                        {
-                            EmploymentTypeId = 2,
-                            Name = "Employee"
-                        });
-                });
-
             modelBuilder.Entity("Schlagen.Data.EntityClasses.InformationRequest", b =>
                 {
                     b.Property<int>("InformationRegardingId")
                         .HasColumnType("int");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(400)")
+                        .HasMaxLength(400);
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -310,7 +237,11 @@ namespace Schlagen.Data.Migrations
                         .HasMaxLength(100);
 
                     b.Property<int>("InformationRequestId")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -347,156 +278,42 @@ namespace Schlagen.Data.Migrations
                         new
                         {
                             InformationTypeId = 1,
-                            Name = "Dedicated Office"
+                            Name = "N/A"
                         },
                         new
                         {
                             InformationTypeId = 2,
-                            Name = "Flexible Desk"
+                            Name = "Dedicated Office"
                         },
                         new
                         {
                             InformationTypeId = 3,
-                            Name = "Virtual Office"
+                            Name = "Flexible Desk"
                         },
                         new
                         {
                             InformationTypeId = 4,
-                            Name = "Conference Room"
+                            Name = "Virtual Office"
                         },
                         new
                         {
                             InformationTypeId = 5,
-                            Name = "Training Room"
+                            Name = "Conference Room"
                         },
                         new
                         {
                             InformationTypeId = 6,
-                            Name = "CoPlay Space"
+                            Name = "Training Room"
                         },
                         new
                         {
                             InformationTypeId = 7,
-                            Name = "Craft Center"
-                        });
-                });
-
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.JobApplicant", b =>
-                {
-                    b.Property<int>("JobApplicantId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<int>("JobRequisitionId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("JobRequisitionId1")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("ResumeText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasMaxLength(20000);
-
-                    b.HasKey("JobApplicantId");
-
-                    b.HasIndex("JobRequisitionId");
-
-                    b.HasIndex("JobRequisitionId1");
-
-                    b.ToTable("JobApplicants","5thFloor");
-                });
-
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.JobRequisition", b =>
-                {
-                    b.Property<int>("JobRequisitionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateToPost")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateToRemove")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(1000)")
-                        .HasMaxLength(1000);
-
-                    b.Property<int>("EmploymentLocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EmploymentTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("JobTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasMaxLength(200);
-
-                    b.HasKey("JobRequisitionId");
-
-                    b.HasIndex("EmploymentLocationId");
-
-                    b.HasIndex("EmploymentTypeId");
-
-                    b.HasIndex("JobTypeId");
-
-                    b.ToTable("JobRequisitions","5thFloor");
-                });
-
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.JobType", b =>
-                {
-                    b.Property<int>("JobTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.HasKey("JobTypeId");
-
-                    b.ToTable("JobTypes","5thFloor");
-
-                    b.HasData(
-                        new
-                        {
-                            JobTypeId = 1,
-                            Name = "Part Time"
+                            Name = "CoPlay Space"
                         },
                         new
                         {
-                            JobTypeId = 2,
-                            Name = "Full Time"
+                            InformationTypeId = 8,
+                            Name = "Craft Center"
                         });
                 });
 
@@ -556,40 +373,6 @@ namespace Schlagen.Data.Migrations
                     b.HasOne("Schlagen.Data.EntityClasses.InformationType", "InformationRegarding")
                         .WithMany()
                         .HasForeignKey("InformationRegardingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.JobApplicant", b =>
-                {
-                    b.HasOne("Schlagen.Data.EntityClasses.JobRequisition", "JobRequisition")
-                        .WithMany()
-                        .HasForeignKey("JobRequisitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Schlagen.Data.EntityClasses.JobRequisition", null)
-                        .WithMany("Applicants")
-                        .HasForeignKey("JobRequisitionId1");
-                });
-
-            modelBuilder.Entity("Schlagen.Data.EntityClasses.JobRequisition", b =>
-                {
-                    b.HasOne("Schlagen.Data.EntityClasses.EmploymentLocation", "Location")
-                        .WithMany()
-                        .HasForeignKey("EmploymentLocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Schlagen.Data.EntityClasses.EmploymentType", "EmploymentType")
-                        .WithMany()
-                        .HasForeignKey("EmploymentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Schlagen.Data.EntityClasses.JobType", "JobType")
-                        .WithMany()
-                        .HasForeignKey("JobTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
