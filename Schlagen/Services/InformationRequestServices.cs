@@ -45,19 +45,24 @@ namespace Schlagen.Services
 
         public async Task<List<InformationRequest>> GetInformationRequests()
         {
+            // Retrieve all the information requests
             return await _context.InformationRequests
                 .AsNoTracking().ToListAsync();
         }
 
         public async Task<List<InformationType>> GetInformationTypes()
         {
+            // Get the information types.  Ignore item = 1, "N/A"
             return await _context.InformationTypes
                 .AsNoTracking()
                 .Where(it => it.InformationTypeId > 1)
                 .ToListAsync();
         }
+
+        
         public async Task<InformationType> GetInformationType(int informationTypeId)
         {
+            // Get the specified information type item
             return await _context.InformationTypes
                 .AsNoTracking()
                 .Where(it => it.InformationTypeId == informationTypeId)

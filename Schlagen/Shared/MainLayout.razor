@@ -1,4 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using Blazored.Toast.Configuration
+
+@inherits LayoutComponentBase
+
+<BlazoredToasts Position="ToastPosition.TopRight"
+                Timeout="5" 
+                SuccessClass="success-toast-override"
+                SuccessIconClass="fa fa-thumbs-up"
+                ErrorIconClass="fa fa-bug" />
 
 <header>
     <nav class="navbar navbar-expand-lg navbar-light navbar-toggleable-sm bg-white border-bottom box-shadow mb-3">

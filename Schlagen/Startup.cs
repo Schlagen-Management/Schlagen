@@ -20,6 +20,8 @@ using System.Net.Http;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.KeyVault.Models;
+using Blazored.Toast;
+using Blazored.Toast.Services;
 
 namespace Schlagen
 {
@@ -52,11 +54,14 @@ namespace Schlagen
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddBlazoredToast();
+
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             //services.AddScoped<IEmploymentServices, EmploymentServices>();
             services.AddScoped<IInformationRequestServices, InformationRequestServices>();
             services.AddScoped<AzureServiceTokenProvider>();
             services.AddSingleton<IEmailService, EmailService>();
+            services.AddScoped<ToastService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -114,6 +119,7 @@ namespace Schlagen
 
             IdentityResult result;
 
+            // Create the desired roles
             foreach (var roleName in roleNames)
             {
                 if (await roleManager.RoleExistsAsync(roleName) == false)
@@ -138,6 +144,7 @@ namespace Schlagen
 
                     if (createdAdminUser.Succeeded)
                     {
+                        // Assign the user to the admin role
                         result
                             = await userManager.AddToRoleAsync(sysAdmin, "Admin");
                     }
