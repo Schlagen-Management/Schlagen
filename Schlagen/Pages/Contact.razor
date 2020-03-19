@@ -11,6 +11,8 @@
 @using SendGrid.Helpers.Mail
 @using System.Text
 @using System.Net
+@using Microsoft.Extensions.Logging
+
 
 @inject UserManager<IdentityUser> UserManager
 @inject NavigationManager NavigationManager
@@ -19,6 +21,7 @@
 @inject HttpClient Http
 @inject IEmailService EmailService
 @inject IToastService ToastService
+@inject ILogger<Contact> Logger
 @inherits OwningComponentBase<IInformationRequestServices>
 
 <section id="page-heading">
@@ -60,7 +63,7 @@
                         <Radzen.Blazor.RadzenDropDown Name="InformationRegarding" class="form-control"
                                                       @bind-Value="@informationRequest.InformationRegardingId"
                                                       Data="@informationTypes" TextProperty="Name"
-                                                      ValueProperty="InformationTypeId" 
+                                                      ValueProperty="InformationTypeId"
                                                       Placeholder="Select type of information requested" />
 
                     </div>
@@ -112,10 +115,6 @@
         // request
         informationTypes
             = await @Service.GetInformationTypes();
-
-        ToastService.ShowError("Test", "TEST");
-        ToastService.ShowInfo("Test", "TEST");
-        ToastService.ShowSuccess("Test", "TEST");
     }
 
     protected async Task SaveInformationRequest()
@@ -129,7 +128,7 @@
 
             if (result.StatusCode != HttpStatusCode.Accepted)
             {
-                // TODO: Log the error and return
+                Logger.LogError("Contact:SaveInformationRequest - Error sending the information request");
 
                 ToastService.ShowError("Error encountered sending information request", "ERROR");
 
@@ -145,7 +144,7 @@
 
             if (success == false)
             {
-                // TODO: Log the error and return
+                Logger.LogError("Contact:SaveInformationRequest - Error saving information request to the database");
 
                 ToastService.ShowError("Error encountered saving your information request", "ERROR");
             }
@@ -174,9 +173,10 @@
                 var googleReply = JsonSerializer.Deserialize<ReCaptcha>(gReply);
                 return (googleReply.Success == true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO: Added exception loggging 
+                Logger.LogError(ex, "Contact:Validate - Error validating reCaptcha response");
+
                 throw;
             }
         }
@@ -202,12 +202,11 @@
         message = message.AppendLine(string.Format("Name: {0}", request.Name));
         message = message.AppendLine(string.Format("Email: {0}", request.Email));
         message = message.AppendLine(string.Format("Phone: {0}", request.Phone));
-        message = message.AppendLine(string.Format("Type of Information: {0}", informationType.Name));
+        message = message.AppendLine(string.Format("Type of Information: {0}",
+            informationType != null ? informationType.Name : "N/A"));
         message = message.AppendLine(string.Format("Details: {0}", request.Details));
 
         // Send the email
-        return await @EmailService.SendEmail(from, new EmailAddress("littlejohnjt@hotmail.com"), subject, message.ToString());
-
-        // TODO: Add error handling and logging
+        return await @EmailService.SendEmail(from, to, subject, message.ToString());
     }
 }
