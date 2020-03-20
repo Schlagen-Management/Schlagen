@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Schlagen.Data;
 using Schlagen.Data.EntityClasses;
 using System;
@@ -12,9 +13,13 @@ namespace Schlagen.Services
     {
         private ApplicationDbContext _context { get; set; }
 
-        public InformationRequestServices(ApplicationDbContext context)
+        private ILogger _logger { get; set; }
+
+        public InformationRequestServices(ApplicationDbContext context, ILogger<InformationRequestServices> logger)
         {
             _context = context;
+
+            _logger = logger;
         }
 
         public async Task<bool> AddInformationRequest(
@@ -36,28 +41,34 @@ namespace Schlagen.Services
 
                 return await _context.SaveChangesAsync() != 0;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO: log the exception
+                _logger.LogError(ex, "InformationRequestServices:AddInformationRequest - Exception occurred executing ApplicationDbContext.SaveChangesAsync()");
+
                 return false;
             }
         }
 
         public async Task<List<InformationRequest>> GetInformationRequests()
         {
+            // Retrieve all the information requests
             return await _context.InformationRequests
                 .AsNoTracking().ToListAsync();
         }
 
         public async Task<List<InformationType>> GetInformationTypes()
         {
+            // Get the information types.  Ignore item = 1, "N/A"
             return await _context.InformationTypes
                 .AsNoTracking()
                 .Where(it => it.InformationTypeId > 1)
                 .ToListAsync();
         }
+
+        
         public async Task<InformationType> GetInformationType(int informationTypeId)
         {
+            // Get the specified information type item
             return await _context.InformationTypes
                 .AsNoTracking()
                 .Where(it => it.InformationTypeId == informationTypeId)

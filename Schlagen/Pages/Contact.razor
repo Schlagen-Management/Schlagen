@@ -7,8 +7,12 @@
 @using System.Text.Json;
 @using System.Text.Json.Serialization;
 @using Microsoft.Extensions.Configuration
+@using SendGrid
 @using SendGrid.Helpers.Mail
 @using System.Text
+@using System.Net
+@using Microsoft.Extensions.Logging
+
 
 @inject UserManager<IdentityUser> UserManager
 @inject NavigationManager NavigationManager
@@ -16,6 +20,8 @@
 @inject IConfiguration Configuration
 @inject HttpClient Http
 @inject IEmailService EmailService
+@inject IToastService ToastService
+@inject ILogger<Contact> Logger
 @inherits OwningComponentBase<IInformationRequestServices>
 
 <section id="page-heading">
@@ -32,6 +38,7 @@
             <div class="col">
                 <EditForm Model="@informationRequest"
                           OnValidSubmit="SaveInformationRequest">
+                    <!-- Use data annotation validator due to ease and simplicity -->
                     <DataAnnotationsValidator />
                     <div class="form-group">
                         <label for="Name">Name</label>
@@ -56,7 +63,7 @@
                         <Radzen.Blazor.RadzenDropDown Name="InformationRegarding" class="form-control"
                                                       @bind-Value="@informationRequest.InformationRegardingId"
                                                       Data="@informationTypes" TextProperty="Name"
-                                                      ValueProperty="InformationTypeId" 
+                                                      ValueProperty="InformationTypeId"
                                                       Placeholder="Select type of information requested" />
 
                     </div>
@@ -86,44 +93,66 @@
 
     public string captchaToken { get; set; }
 
+    protected override async void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Get the reCaptcha token
+
+            // Get the sitekey from app settings
+            var siteKey = Configuration.GetSection("AppSettings")["CaptchaSiteKey"];
+
+            captchaToken = await JSRuntime.InvokeAsync<string>("runCaptcha", siteKey, "ContactPage");
+            StateHasChanged();
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
+        // Get the collection of information types to potentially
+        // request
         informationTypes
             = await @Service.GetInformationTypes();
-
     }
 
     protected async Task SaveInformationRequest()
     {
+        // Validate the reCaptcha token
         if (Validate(captchaToken) == true)
         {
-            // Emil the info
-            await SendInformationRequest(informationRequest);
+            // Email the info to the specified email address
+            var result
+                = await SendInformationRequest(informationRequest);
 
-            // Persist it to the DB
+            if (result.StatusCode != HttpStatusCode.Accepted)
+            {
+                Logger.LogError("Contact:SaveInformationRequest - Error sending the information request");
+
+                ToastService.ShowError("Error encountered sending information request", "ERROR");
+
+                return;
+            }
+
+            // Persist the information to the DB
             var success
                 = await @Service.AddInformationRequest(informationRequest.Name,
                     informationRequest.Email, informationRequest.Phone,
                     informationRequest.InformationRegardingId,
                     informationRequest.Details);
 
-            // TODO: Add toast notification that information successfully sent
+            if (success == false)
+            {
+                Logger.LogError("Contact:SaveInformationRequest - Error saving information request to the database");
+
+                ToastService.ShowError("Error encountered saving your information request", "ERROR");
+            }
+
+            ToastService.ShowSuccess("Your information request has been sent", "SUCCESS");
 
             // Navigate back to the home page
             NavigationManager.NavigateTo("/");
-        }
-    }
-
-    protected override async void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Get the Captcha token
-            var siteKey = Configuration.GetSection("AppSettings")["CaptchaSiteKey"];
-            captchaToken = await JSRuntime.InvokeAsync<string>("runCaptcha", siteKey, "ContactPage");
-            StateHasChanged();
         }
     }
 
@@ -133,8 +162,9 @@
         {
             try
             {
-                // Enter your reCAPTCHA private key here
+                // Enter your reCAPTCHA private key here, get it from AppSettings
                 var secretKey = Configuration.GetSection("AppSettings")["CaptchaSecretKey"];
+
                 var gReply = client.DownloadString(string.Format(
                         "https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}",
                         secretKey, gResponse));
@@ -143,15 +173,16 @@
                 var googleReply = JsonSerializer.Deserialize<ReCaptcha>(gReply);
                 return (googleReply.Success == true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO: Added exception loggging 
+                Logger.LogError(ex, "Contact:Validate - Error validating reCaptcha response");
+
                 throw;
             }
         }
     }
 
-    protected async Task SendInformationRequest(InformationRequest request)
+    protected async Task<Response> SendInformationRequest(InformationRequest request)
     {
         // Build and send the email
         var adminEmail
@@ -162,18 +193,20 @@
         var to = new EmailAddress(_5thFloorInformationEmail);
         var subject = "New Avalon Innovation Club Information Request";
 
+        // Get the description of the selected information type
         var informationType
             = await @Service.GetInformationType(request.InformationRegardingId);
 
+        // Build the message
         var message = new StringBuilder();
         message = message.AppendLine(string.Format("Name: {0}", request.Name));
         message = message.AppendLine(string.Format("Email: {0}", request.Email));
         message = message.AppendLine(string.Format("Phone: {0}", request.Phone));
-        message = message.AppendLine(string.Format("Type of Information: {0}", informationType.Name));
+        message = message.AppendLine(string.Format("Type of Information: {0}",
+            informationType != null ? informationType.Name : "N/A"));
         message = message.AppendLine(string.Format("Details: {0}", request.Details));
 
-        await @EmailService.SendEmail(from, to, subject, message.ToString());
-
-        // TODO: Add error handling and logging
+        // Send the email
+        return await @EmailService.SendEmail(from, to, subject, message.ToString());
     }
 }
