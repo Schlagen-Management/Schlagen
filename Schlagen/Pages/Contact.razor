@@ -89,7 +89,7 @@
 
     public InformationRequest informationRequest { get; set; } = new InformationRequest();
 
-    public List<InformationType> informationTypes { get; set; }
+    public List<InformationType> informationTypes { get; set; } = new List<InformationType>();
 
     public string captchaToken { get; set; }
 
@@ -113,8 +113,8 @@
 
         // Get the collection of information types to potentially
         // request
-        informationTypes
-            = await @Service.GetInformationTypes();
+        //informationTypes
+        //    = await @Service.GetInformationTypes();
     }
 
     protected async Task SaveInformationRequest()
