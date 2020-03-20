@@ -91,13 +91,13 @@ namespace Schlagen
                 endpoints.MapFallbackToPage("/_Host");
             });
 
-            // Perform database migration if required
-            var dbContext
-                = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            dbContext.Database.Migrate();
+            //// Perform database migration if required
+            //var dbContext
+            //    = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            //dbContext.Database.Migrate();
 
-            // Create the required user roles
-            CreateRolesAsync(serviceProvider, env).Wait();
+            //// Create the required user roles
+            //CreateRolesAsync(serviceProvider, env).Wait();
         }
 
         private async Task CreateRolesAsync(IServiceProvider serviceProvider, IWebHostEnvironment env)
