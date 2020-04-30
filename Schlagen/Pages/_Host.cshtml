@@ -10,8 +10,17 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Schlagen</title>
+    <title>Avalon Innovation Club</title>
+    <meta description="Shared and custom workspaces for prowork and coplay in Orlando Florida" />
+    <meta author="The 5th Floor" />
     <base href="~/" />
+    <link rel="apple-touch-icon" sizes="180x180" href="fav-icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="fav-icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="fav-icons/favicon-16x16.png">
+    <link rel="manifest" href="fav-icons/site.webmanifest">
+    <link rel="mask-icon" href="fav-icons/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/default.css">
@@ -32,16 +41,16 @@
             An unhandled exception has occurred. See browser dev tools for details.
         </environment>
         <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+        <a class="dismiss"><i class="fa fa-times"></i></a>
     </div>
 
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="_framework/blazor.server.js"></script>
-    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
-
+    <!-- <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script> -->
     <!-- Script that captures the Google recaptcha v3 token, called via JSInterop from C# -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LdxB-EUAAAAAPq6BCTVmSp8fgYh5VeEMACcjZ_Y"></script>
-    <script>
-        runCaptcha = function (siteKey, actionName) {
+    <script>runCaptcha = function (siteKey, actionName) {
             return new Promise((resolve, reject) => {
                 grecaptcha.ready(function () {
                     grecaptcha.execute(siteKey, { action: actionName }).then(function (token) {
@@ -49,7 +58,6 @@
                     });
                 });
             });
-        };
-    </script>
+        };</script>
 </body>
 </html>

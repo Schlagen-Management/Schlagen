@@ -2,14 +2,14 @@
 
 @inherits LayoutComponentBase
 
+<BlazoredToasts Position="ToastPosition.TopCenter"
+                Timeout="5"
+                SuccessClass="success-toast-override" />
+
 <header>
     <NavMenu />
 </header>
 <div class="main">
-    <BlazoredToasts Position="ToastPosition.TopCenter"
-                    Timeout="5"
-                    SuccessClass="success-toast-override" />
-
     <div class="content">
         @Body
     </div>
@@ -20,5 +20,4 @@
             <div class="col">&copy;2020 the 5th floor - All Rights Reserved.</div>
         </div>
     </div>
-    <LoginDisplay />
 </footer>
