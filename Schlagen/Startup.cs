@@ -1,5 +1,3 @@
-using Blazored.Toast;
-using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -33,23 +31,27 @@ namespace Schlagen
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddApplicationInsightsTelemetry();
+            if (Environment.GetEnvironmentVariable("DATABASE_ENVIRONMENT") == "Development")
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(
+                    Configuration.GetConnectionString("ProdConnection")));
+            else
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(
+                    Configuration.GetConnectionString("DevConnection")));
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(
-                options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 //.AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 
             services.AddScoped<IInformationRequestServices, InformationRequestServices>();
             services.AddSingleton<IEmailService, EmailService>();
-            services.AddScoped<ToastService>();
-            services.AddBlazoredToast();
+
+            services.BuildServiceProvider().GetService<ApplicationDbContext>().Database.Migrate();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,12 +83,6 @@ namespace Schlagen
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-
-            //// Perform database migration if required
-            //var dbContext
-            //    = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            //if (dbContext.Database.GetPendingMigrations().Any())
-            //    dbContext.Database.Migrate();
 
             //// Create the required user roles
             //CreateRolesAsync(serviceProvider, env).Wait();
