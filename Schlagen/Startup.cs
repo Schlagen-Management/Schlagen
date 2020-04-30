@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +14,7 @@ using Schlagen.Data;
 using Schlagen.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -40,25 +40,16 @@ namespace Schlagen
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(
                 options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
+                //.AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            services.AddScoped<HttpClient>(s =>
-            {
-                var navigator = s.GetRequiredService<NavigationManager>();
-                return new HttpClient { BaseAddress = new Uri(navigator.BaseUri) };
-            });
-
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddBlazoredToast();
-
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-            //services.AddScoped<IEmploymentServices, EmploymentServices>();
+
             services.AddScoped<IInformationRequestServices, InformationRequestServices>();
-            services.AddScoped<AzureServiceTokenProvider>();
             services.AddSingleton<IEmailService, EmailService>();
             services.AddScoped<ToastService>();
+            services.AddBlazoredToast();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,7 +85,8 @@ namespace Schlagen
             //// Perform database migration if required
             //var dbContext
             //    = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            //dbContext.Database.Migrate();
+            //if (dbContext.Database.GetPendingMigrations().Any())
+            //    dbContext.Database.Migrate();
 
             //// Create the required user roles
             //CreateRolesAsync(serviceProvider, env).Wait();

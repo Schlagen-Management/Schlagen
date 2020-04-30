@@ -18,7 +18,6 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject IConfiguration Configuration
-@inject HttpClient Http
 @inject IEmailService EmailService
 @inject IToastService ToastService
 @inject ILogger<Contact> Logger
@@ -113,8 +112,8 @@
 
         // Get the collection of information types to potentially
         // request
-        //informationTypes
-        //    = await @Service.GetInformationTypes();
+        informationTypes
+            = await @Service.GetInformationTypes();
     }
 
     protected async Task SaveInformationRequest()
