@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <Content Remove="Pages\JobRequisition.razor" />
+    <Content Remove="wwwroot\favicon.ico" />
+    <Content Remove="wwwroot\images\t5f-logo-white.png" />
   </ItemGroup>
 
   <ItemGroup>
