@@ -51,7 +51,7 @@ namespace Schlagen
             services.AddScoped<IInformationRequestServices, InformationRequestServices>();
             services.AddSingleton<IEmailService, EmailService>();
 
-            services.BuildServiceProvider().GetService<ApplicationDbContext>().Database.Migrate();
+            //services.BuildServiceProvider().GetService<ApplicationDbContext>().Database.Migrate();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
